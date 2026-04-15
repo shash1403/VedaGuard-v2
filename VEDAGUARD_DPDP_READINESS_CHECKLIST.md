@@ -57,38 +57,7 @@ Status legend:
 | Secure secret handling in codebase | Amber | Repo avoids committing sensitive mnemonics; env-based flow documented in `vedaguard/README.md` | Add managed secret store and production incident playbook |
 | Least-privilege admin operations | Amber | Admin-only contract gates exist | Implement multisig and dual-control approval process |
 
-## G. Data Principal Rights Operations
-
-| Control | Status | Current Evidence | Gap / Action |
-|---|---|---|---|
-| Access right workflow | Amber | Consent authorization exists | Add formal data access request portal and SLA tracking |
-| Correction and erasure rights workflow | Red | Not represented in smart contract or service workflows | Build off-chain correction/erasure orchestration with audit logs |
-| Portability after adulthood handoff | Amber | Authority moves to adult wallet on handoff | Add hospital export + re-encryption pipeline to adult endpoint |
-
-## H. Incident Response and Accountability
-
-| Control | Status | Current Evidence | Gap / Action |
-|---|---|---|---|
-| Security incident response plan | Red | No documented IR runbook in repo | Create incident severity matrix, escalation, notification templates |
-| Processor/vendor accountability records | Red | No RoPA/DPA artifacts in repo | Maintain vendor register, DPA annexes, transfer assessments |
-| Internal audit and compliance evidence pack | Amber | Technical evidence exists across code and logs | Package quarterly control evidence and attestation checklist |
-
-## Priority Remediation Plan
-
-### Next 2 weeks
-- Add hospital allowlist contract controls and enforce in `verify_consent`
-- Define and store request purpose codes for each access event
-- Publish privacy notice and consent UX acceptance records
-
-### Next 30 days
-- Introduce consent withdrawal/revocation lifecycle
-- Formalize rights workflows: access, correction, erasure, portability
-- Establish incident response and breach-notification runbook
-
-### Next 60 days
-- Move admin to multisig governance
-- Add automated handoff operations and monitoring
-- Build compliance evidence pack: RoPA, SOPs, audit exports, vendor controls
+ 
 
 ## Practical conclusion
 
