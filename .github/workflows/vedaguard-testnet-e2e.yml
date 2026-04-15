@@ -1,0 +1,56 @@
+# Optional TestNet e2e — run manually; requires repo secrets (never commit mnemonics).
+name: VedaGuard TestNet e2e
+
+on:
+  workflow_dispatch:
+    inputs:
+      fresh_deploy:
+        description: "Deploy new app + SBT on TestNet (needs only DEPLOYER + dispenser secrets)"
+        required: false
+        default: false
+        type: boolean
+
+defaults:
+  run:
+    working-directory: vedaguard
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Build TEAL artifacts
+        run: |
+          cd smart_contracts/veda_guard && poetry run puyapy contract.py --out-dir ../artifacts/veda_guard
+
+      - name: Run TestNet e2e
+        env:
+          ALGOD_SERVER: https://testnet-api.algonode.cloud
+          ALGOD_TOKEN: ""
+          ALGOKIT_DISPENSER_ACCESS_TOKEN: ${{ secrets.ALGOKIT_DISPENSER_ACCESS_TOKEN }}
+          DEPLOYER_MNEMONIC: ${{ secrets.DEPLOYER_MNEMONIC }}
+          VEDAGUARD_E2E_APP_ID: ${{ secrets.VEDAGUARD_E2E_APP_ID }}
+          VEDAGUARD_E2E_SBT_ID: ${{ secrets.VEDAGUARD_E2E_SBT_ID }}
+          VEDAGUARD_E2E_PRINCIPAL_MNEMONIC: ${{ secrets.VEDAGUARD_E2E_PRINCIPAL_MNEMONIC }}
+        run: |
+          set -e
+          if [ "${{ inputs.fresh_deploy }}" = "true" ]; then
+            poetry run python scripts/run_testnet_e2e.py --fresh
+          else
+            poetry run python scripts/run_testnet_e2e.py
+          fi

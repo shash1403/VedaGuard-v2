@@ -1,0 +1,878 @@
+#pragma version 11
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 0 1 8 5 567648000
+    bytecblock 0x7667 0x151f7c75 "admin" "minor_count" "consent_count" 0x068101
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // contract.py:46
+    // self.admin = Global.creator_address
+    bytec_2 // "admin"
+    global CreatorAddress
+    app_global_put
+    // contract.py:47
+    // self.minor_count = UInt64(0)
+    bytec_3 // "minor_count"
+    intc_0 // 0
+    app_global_put
+    // contract.py:48
+    // self.consent_count = UInt64(0)
+    bytec 4 // "consent_count"
+    intc_0 // 0
+    app_global_put
+
+main_after_if_else@2:
+    // contract.py:33
+    // class VedaGuard(ARC4Contract):
+    txn NumAppArgs
+    bz main___algopy_default_create@17
+    txn OnCompletion
+    !
+    assert
+    txn ApplicationID
+    assert
+    pushbytess 0x7ecdae9d 0xe539d9bb 0xa00d3bc6 0xb26ca69f 0xab2a08e4 0x0cab6c18 0x01881955 0x34a245bf // method "onboard_minor(address,uint64,byte[])uint64", method "distribute_and_freeze_sbt(uint64,address)void", method "verify_consent(axfer,pay)bool", method "check_age_transition(uint64)bool", method "handoff_sbt_to_adult(uint64,address)void", method "get_sbt_principal_record(uint64)(uint64,address,address)", method "get_consent_count()uint64", method "get_minor_count()uint64"
+    txna ApplicationArgs 0
+    match onboard_minor distribute_and_freeze_sbt verify_consent check_age_transition handoff_sbt_to_adult get_sbt_principal_record get_consent_count get_minor_count
+    err
+
+main___algopy_default_create@17:
+    txn OnCompletion
+    !
+    txn ApplicationID
+    !
+    &&
+    return
+
+
+// _puya_lib.util.ensure_budget(required_budget: uint64, fee_source: uint64) -> void:
+ensure_budget:
+    proto 2 0
+    frame_dig -2
+    pushint 10
+    +
+
+ensure_budget_while_top@1:
+    frame_dig 0
+    global OpcodeBudget
+    >
+    bz ensure_budget_after_while@6
+    itxn_begin
+    pushint 6 // appl
+    itxn_field TypeEnum
+    intc_3 // DeleteApplication
+    itxn_field OnCompletion
+    bytec 5 // 0x068101
+    itxn_field ApprovalProgram
+    bytec 5 // 0x068101
+    itxn_field ClearStateProgram
+    frame_dig -1
+    switch ensure_budget_switch_case_0@3 ensure_budget_switch_case_1@4
+
+ensure_budget_switch_case_next@5:
+    itxn_submit
+    b ensure_budget_while_top@1
+
+ensure_budget_switch_case_1@4:
+    global MinTxnFee
+    itxn_field Fee
+    b ensure_budget_switch_case_next@5
+
+ensure_budget_switch_case_0@3:
+    intc_0 // 0
+    itxn_field Fee
+    b ensure_budget_switch_case_next@5
+
+ensure_budget_after_while@6:
+    retsub
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.onboard_minor[routing]() -> void:
+onboard_minor:
+    // contract.py:55
+    // @arc4.abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    pushint 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    dup
+    btoi
+    txna ApplicationArgs 3
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    // contract.py:82
+    // assert Txn.sender == self.admin, "Only admin can onboard"
+    txn Sender
+    intc_0 // 0
+    bytec_2 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can onboard
+    // contract.py:83
+    // assert birth_date > UInt64(0), "Birth date must be positive"
+    swap
+    assert // Birth date must be positive
+    // contract.py:84
+    // assert principal_commitment.length == UInt64(32), "principal_commitment must be 32 bytes"
+    dup
+    len
+    pushint 32
+    ==
+    assert // principal_commitment must be 32 bytes
+    // contract.py:86
+    // ensure_budget(UInt64(10_000), fee_source=OpUpFeeSource.GroupCredit)
+    pushint 10000
+    intc_0 // 0
+    callsub ensure_budget
+    // contract.py:88
+    // self.minor_count += UInt64(1)
+    intc_0 // 0
+    bytec_3 // "minor_count"
+    app_global_get_ex
+    assert // check self.minor_count exists
+    intc_1 // 1
+    +
+    bytec_3 // "minor_count"
+    swap
+    app_global_put
+    // contract.py:90
+    // app_self = Global.current_application_address
+    global CurrentApplicationAddress
+    // contract.py:92-106
+    // itxn.AssetConfig(
+    //     total=UInt64(1),
+    //     decimals=UInt64(0),
+    //     default_frozen=False,
+    //     asset_name=Bytes(b"VedaGuard Pediatric SBT"),
+    //     unit_name=Bytes(b"VG-SBT"),
+    //     url=Bytes(b""),
+    //     metadata_hash=principal_commitment,
+    //     manager=app_self,
+    //     reserve=app_self,
+    //     freeze=app_self,
+    //     clawback=app_self,
+    //     fee=UInt64(0),
+    // )
+    // .submit()
+    itxn_begin
+    dup
+    itxn_field ConfigAssetClawback
+    dup
+    itxn_field ConfigAssetFreeze
+    dup
+    itxn_field ConfigAssetReserve
+    itxn_field ConfigAssetManager
+    itxn_field ConfigAssetMetadataHash
+    // contract.py:98
+    // url=Bytes(b""),
+    pushbytes 0x
+    itxn_field ConfigAssetURL
+    // contract.py:97
+    // unit_name=Bytes(b"VG-SBT"),
+    pushbytes 0x56472d534254
+    itxn_field ConfigAssetUnitName
+    // contract.py:96
+    // asset_name=Bytes(b"VedaGuard Pediatric SBT"),
+    pushbytes 0x5665646147756172642050656469617472696320534254
+    itxn_field ConfigAssetName
+    // contract.py:95
+    // default_frozen=False,
+    intc_0 // 0
+    itxn_field ConfigAssetDefaultFrozen
+    // contract.py:94
+    // decimals=UInt64(0),
+    intc_0 // 0
+    itxn_field ConfigAssetDecimals
+    // contract.py:93
+    // total=UInt64(1),
+    intc_1 // 1
+    itxn_field ConfigAssetTotal
+    // contract.py:92
+    // itxn.AssetConfig(
+    pushint 3 // acfg
+    itxn_field TypeEnum
+    // contract.py:104
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:92-106
+    // itxn.AssetConfig(
+    //     total=UInt64(1),
+    //     decimals=UInt64(0),
+    //     default_frozen=False,
+    //     asset_name=Bytes(b"VedaGuard Pediatric SBT"),
+    //     unit_name=Bytes(b"VG-SBT"),
+    //     url=Bytes(b""),
+    //     metadata_hash=principal_commitment,
+    //     manager=app_self,
+    //     reserve=app_self,
+    //     freeze=app_self,
+    //     clawback=app_self,
+    //     fee=UInt64(0),
+    // )
+    // .submit()
+    itxn_submit
+    // contract.py:110
+    // zero = arc4.Address(Global.zero_address)
+    global ZeroAddress
+    // contract.py:92-107
+    // itxn.AssetConfig(
+    //     total=UInt64(1),
+    //     decimals=UInt64(0),
+    //     default_frozen=False,
+    //     asset_name=Bytes(b"VedaGuard Pediatric SBT"),
+    //     unit_name=Bytes(b"VG-SBT"),
+    //     url=Bytes(b""),
+    //     metadata_hash=principal_commitment,
+    //     manager=app_self,
+    //     reserve=app_self,
+    //     freeze=app_self,
+    //     clawback=app_self,
+    //     fee=UInt64(0),
+    // )
+    // .submit()
+    // .created_asset.id
+    itxn CreatedAssetID
+    // contract.py:111
+    // key = arc4.UInt64(sbt_id)
+    itob
+    // contract.py:112
+    // row = SbtPrincipalRecord(arc4.UInt64(birth_date), arc4.Address(parent), zero)
+    uncover 2
+    uncover 3
+    concat
+    uncover 2
+    concat
+    // contract.py:113
+    // self.sbt_registry[key] = row.copy()
+    bytec_0 // 0x7667
+    dig 2
+    concat
+    swap
+    box_put
+    // contract.py:115
+    // log(b"ONBOARD: minor registered, SBT ASA created")
+    pushbytes 0x4f4e424f4152443a206d696e6f7220726567697374657265642c20534254204153412063726561746564
+    log
+    // contract.py:55
+    // @arc4.abimethod()
+    bytec_1 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.distribute_and_freeze_sbt[routing]() -> void:
+distribute_and_freeze_sbt:
+    // contract.py:118
+    // @arc4.abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    dup
+    btoi
+    txna ApplicationArgs 2
+    dup
+    len
+    pushint 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // contract.py:130
+    // assert Txn.sender == self.admin, "Only admin can distribute SBT"
+    txn Sender
+    intc_0 // 0
+    bytec_2 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can distribute SBT
+    // contract.py:132
+    // ensure_budget(UInt64(8_000), fee_source=OpUpFeeSource.GroupCredit)
+    pushint 8000
+    intc_0 // 0
+    callsub ensure_budget
+    // contract.py:135
+    // assert sbt_key in self.sbt_registry, "SBT not registered"
+    bytec_0 // 0x7667
+    uncover 3
+    concat
+    dup
+    box_len
+    bury 1
+    assert // SBT not registered
+    // contract.py:136
+    // reg = self.sbt_registry[sbt_key].copy()
+    box_get
+    pop
+    // contract.py:137
+    // assert holder == reg.guardian.native, "Holder must match onboarded guardian"
+    extract 8 32
+    dig 1
+    ==
+    assert // Holder must match onboarded guardian
+    // contract.py:139-144
+    // itxn.AssetTransfer(
+    //     xfer_asset=sbt,
+    //     asset_amount=UInt64(1),
+    //     asset_receiver=holder,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_begin
+    dup
+    itxn_field AssetReceiver
+    // contract.py:141
+    // asset_amount=UInt64(1),
+    intc_1 // 1
+    itxn_field AssetAmount
+    dig 1
+    itxn_field XferAsset
+    // contract.py:139
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    // contract.py:143
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:139-144
+    // itxn.AssetTransfer(
+    //     xfer_asset=sbt,
+    //     asset_amount=UInt64(1),
+    //     asset_receiver=holder,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_submit
+    // contract.py:146-151
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=holder,
+    //     frozen=True,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_begin
+    // contract.py:149
+    // frozen=True,
+    intc_1 // 1
+    itxn_field FreezeAssetFrozen
+    itxn_field FreezeAssetAccount
+    itxn_field FreezeAsset
+    // contract.py:146
+    // itxn.AssetFreeze(
+    intc_3 // afrz
+    itxn_field TypeEnum
+    // contract.py:150
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:146-151
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=holder,
+    //     frozen=True,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_submit
+    // contract.py:153
+    // log(b"SBT: transferred to holder and frozen (non-transferable)")
+    pushbytes 0x5342543a207472616e7366657272656420746f20686f6c64657220616e642066726f7a656e20286e6f6e2d7472616e7366657261626c6529
+    log
+    // contract.py:118
+    // @arc4.abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.verify_consent[routing]() -> void:
+verify_consent:
+    intc_0 // 0
+    dup
+    // contract.py:159
+    // @arc4.abimethod()
+    txn GroupIndex
+    pushint 2
+    -
+    dup
+    gtxns TypeEnum
+    pushint 4 // axfer
+    ==
+    assert // transaction type is axfer
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    cover 2
+    dup
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    // contract.py:185
+    // hospital_req.group_index + UInt64(1) == parent_auth.group_index
+    dig 1
+    gtxns GroupIndex
+    intc_1 // 1
+    +
+    dig 1
+    gtxns GroupIndex
+    ==
+    // contract.py:184-186
+    // assert (
+    //     hospital_req.group_index + UInt64(1) == parent_auth.group_index
+    // ), "Atomic group ordering violation"
+    assert // Atomic group ordering violation
+    // contract.py:188
+    // assert parent_auth.amount == UInt64(0), "Consent must be free — no payment"
+    gtxns Amount
+    !
+    assert // Consent must be free — no payment
+    // contract.py:190
+    // axfer_asset = hospital_req.xfer_asset
+    gtxns XferAsset
+    // contract.py:191
+    // sbt_key = arc4.UInt64(axfer_asset.id)
+    itob
+    // contract.py:192
+    // zero = arc4.Address(Global.zero_address)
+    global ZeroAddress
+    swap
+    // contract.py:193
+    // if sbt_key in self.sbt_registry:
+    bytec_0 // 0x7667
+    swap
+    concat
+    dup
+    box_len
+    bury 1
+    bz verify_consent_after_if_else@6
+    // contract.py:194
+    // reg = self.sbt_registry[sbt_key].copy()
+    dup
+    box_get
+    swap
+    dup
+    cover 2
+    bury 6
+    assert // check self.sbt_registry entry exists
+    // contract.py:195
+    // if reg.adult_principal == zero:
+    extract 40 32
+    dup
+    bury 6
+    dig 2
+    ==
+    bz verify_consent_after_if_else@5
+    // contract.py:196
+    // principal = reg.guardian.native
+    dig 3
+    extract 8 32
+    bury 5
+
+verify_consent_after_if_else@5:
+    // contract.py:199
+    // assert parent_auth.sender == principal, "Signer must be current data principal"
+    dig 2
+    gtxns Sender
+    dig 5
+    ==
+    assert // Signer must be current data principal
+
+verify_consent_after_if_else@6:
+    // contract.py:201
+    // self.consent_count += UInt64(1)
+    intc_0 // 0
+    bytec 4 // "consent_count"
+    app_global_get_ex
+    assert // check self.consent_count exists
+    intc_1 // 1
+    +
+    bytec 4 // "consent_count"
+    swap
+    app_global_put
+    // contract.py:203
+    // log(b"CONSENT: parental consent verified via atomic group")
+    pushbytes 0x434f4e53454e543a20706172656e74616c20636f6e73656e74207665726966696564207669612061746f6d69632067726f7570
+    log
+    // contract.py:159
+    // @arc4.abimethod()
+    pushbytes 0x151f7c7580
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.check_age_transition[routing]() -> void:
+check_age_transition:
+    // contract.py:210
+    // @arc4.abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // contract.py:225
+    // is_adult = Global.latest_timestamp >= birth_date + seconds_in_18_years
+    global LatestTimestamp
+    swap
+    // contract.py:224
+    // seconds_in_18_years = UInt64(567_648_000)
+    intc 4 // 567648000
+    // contract.py:225
+    // is_adult = Global.latest_timestamp >= birth_date + seconds_in_18_years
+    +
+    >=
+    dup
+    // contract.py:227
+    // if is_adult:
+    bz check_age_transition_else_body@3
+    // contract.py:228
+    // log(b"AGE: minor has turned 18 - authority handoff required")
+    pushbytes 0x4147453a206d696e6f7220686173207475726e6564203138202d20617574686f726974792068616e646f6666207265717569726564
+    log
+
+check_age_transition_after_if_else@4:
+    // contract.py:232
+    // return arc4.Bool(is_adult)
+    pushbytes 0x00
+    intc_0 // 0
+    dig 2
+    setbit
+    // contract.py:210
+    // @arc4.abimethod()
+    bytec_1 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+check_age_transition_else_body@3:
+    // contract.py:230
+    // log(b"AGE: minor is still under 18 - parent retains authority")
+    pushbytes 0x4147453a206d696e6f72206973207374696c6c20756e646572203138202d20706172656e742072657461696e7320617574686f72697479
+    log
+    b check_age_transition_after_if_else@4
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.handoff_sbt_to_adult[routing]() -> void:
+handoff_sbt_to_adult:
+    // contract.py:234
+    // @arc4.abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    dup
+    btoi
+    swap
+    txna ApplicationArgs 2
+    dup
+    cover 2
+    len
+    pushint 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // contract.py:249
+    // ensure_budget(UInt64(16_000), fee_source=OpUpFeeSource.GroupCredit)
+    pushint 16000
+    intc_0 // 0
+    callsub ensure_budget
+    // contract.py:252
+    // assert sbt_key in self.sbt_registry, "SBT not registered"
+    bytec_0 // 0x7667
+    swap
+    concat
+    dupn 2
+    box_len
+    bury 1
+    assert // SBT not registered
+    // contract.py:253
+    // reg = self.sbt_registry[sbt_key].copy()
+    box_get
+    pop
+    dup
+    // contract.py:254
+    // guardian = reg.guardian.native
+    extract 8 32
+    // contract.py:255
+    // assert Txn.sender == self.admin or Txn.sender == guardian, "Only admin or guardian can initiate handoff"
+    txn Sender
+    intc_0 // 0
+    bytec_2 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    bnz handoff_sbt_to_adult_bool_true@3
+    txn Sender
+    dig 1
+    ==
+    bz handoff_sbt_to_adult_bool_false@4
+
+handoff_sbt_to_adult_bool_true@3:
+    intc_1 // 1
+
+handoff_sbt_to_adult_bool_merge@5:
+    // contract.py:255
+    // assert Txn.sender == self.admin or Txn.sender == guardian, "Only admin or guardian can initiate handoff"
+    assert // Only admin or guardian can initiate handoff
+    // contract.py:257
+    // zero = arc4.Address(Global.zero_address)
+    global ZeroAddress
+    // contract.py:258
+    // assert reg.adult_principal == zero, "Handoff already completed"
+    dig 2
+    dup
+    cover 2
+    extract 40 32
+    ==
+    assert // Handoff already completed
+    // contract.py:261
+    // birth_u = reg.birth_ts.as_uint64()
+    dup
+    extract 0 8
+    swap
+    intc_0 // 0
+    extract_uint64
+    // contract.py:263
+    // Global.latest_timestamp >= birth_u + seconds_in_18_years
+    global LatestTimestamp
+    swap
+    // contract.py:260
+    // seconds_in_18_years = UInt64(567_648_000)
+    intc 4 // 567648000
+    // contract.py:263
+    // Global.latest_timestamp >= birth_u + seconds_in_18_years
+    +
+    >=
+    // contract.py:262-264
+    // assert (
+    //     Global.latest_timestamp >= birth_u + seconds_in_18_years
+    // ), "Minor not yet 18 — handoff blocked"
+    assert // Minor not yet 18 — handoff blocked
+    // contract.py:266-271
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=guardian,
+    //     frozen=False,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_begin
+    // contract.py:269
+    // frozen=False,
+    intc_0 // 0
+    itxn_field FreezeAssetFrozen
+    dig 1
+    dup
+    itxn_field FreezeAssetAccount
+    dig 6
+    dup
+    cover 2
+    itxn_field FreezeAsset
+    // contract.py:266
+    // itxn.AssetFreeze(
+    intc_3 // afrz
+    itxn_field TypeEnum
+    // contract.py:270
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:266-271
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=guardian,
+    //     frozen=False,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_submit
+    // contract.py:273-279
+    // itxn.AssetTransfer(
+    //     xfer_asset=sbt,
+    //     asset_amount=UInt64(1),
+    //     asset_receiver=adult,
+    //     asset_sender=guardian,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_begin
+    dup
+    itxn_field AssetSender
+    dig 6
+    dup
+    cover 2
+    itxn_field AssetReceiver
+    // contract.py:275
+    // asset_amount=UInt64(1),
+    intc_1 // 1
+    itxn_field AssetAmount
+    dig 2
+    itxn_field XferAsset
+    // contract.py:273
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    // contract.py:278
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:273-279
+    // itxn.AssetTransfer(
+    //     xfer_asset=sbt,
+    //     asset_amount=UInt64(1),
+    //     asset_receiver=adult,
+    //     asset_sender=guardian,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_submit
+    // contract.py:281-286
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=adult,
+    //     frozen=True,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_begin
+    // contract.py:284
+    // frozen=True,
+    intc_1 // 1
+    itxn_field FreezeAssetFrozen
+    dig 1
+    itxn_field FreezeAssetAccount
+    uncover 2
+    itxn_field FreezeAsset
+    // contract.py:281
+    // itxn.AssetFreeze(
+    intc_3 // afrz
+    itxn_field TypeEnum
+    // contract.py:285
+    // fee=UInt64(0),
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:281-286
+    // itxn.AssetFreeze(
+    //     freeze_asset=sbt,
+    //     freeze_account=adult,
+    //     frozen=True,
+    //     fee=UInt64(0),
+    // ).submit()
+    itxn_submit
+    // contract.py:288
+    // new_row = SbtPrincipalRecord(reg.birth_ts, reg.guardian, arc4.Address(adult))
+    uncover 2
+    swap
+    concat
+    swap
+    concat
+    // contract.py:289
+    // self.sbt_registry[sbt_key] = new_row.copy()
+    dig 3
+    swap
+    box_put
+    // contract.py:291
+    // log(b"HANDOFF: adult principal set; SBT re-frozen on child wallet")
+    pushbytes 0x48414e444f46463a206164756c74207072696e636970616c207365743b205342542072652d66726f7a656e206f6e206368696c642077616c6c6574
+    log
+    // contract.py:234
+    // @arc4.abimethod()
+    intc_1 // 1
+    return
+
+handoff_sbt_to_adult_bool_false@4:
+    intc_0 // 0
+    b handoff_sbt_to_adult_bool_merge@5
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.get_sbt_principal_record[routing]() -> void:
+get_sbt_principal_record:
+    // contract.py:293
+    // @arc4.abimethod(readonly=True)
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    // contract.py:301
+    // assert sbt_key in self.sbt_registry, "SBT not registered"
+    bytec_0 // 0x7667
+    swap
+    concat
+    dup
+    box_len
+    bury 1
+    assert // SBT not registered
+    // contract.py:302
+    // return self.sbt_registry[sbt_key].copy()
+    box_get
+    pop
+    // contract.py:293
+    // @arc4.abimethod(readonly=True)
+    bytec_1 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.get_consent_count[routing]() -> void:
+get_consent_count:
+    // contract.py:316
+    // return self.consent_count
+    intc_0 // 0
+    bytec 4 // "consent_count"
+    app_global_get_ex
+    assert // check self.consent_count exists
+    // contract.py:308
+    // @arc4.abimethod(readonly=True)
+    itob
+    bytec_1 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.veda_guard.contract.VedaGuard.get_minor_count[routing]() -> void:
+get_minor_count:
+    // contract.py:321
+    // return self.minor_count
+    intc_0 // 0
+    bytec_3 // "minor_count"
+    app_global_get_ex
+    assert // check self.minor_count exists
+    // contract.py:318
+    // @arc4.abimethod(readonly=True)
+    itob
+    bytec_1 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return

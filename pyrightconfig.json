@@ -1,0 +1,9 @@
+{
+  "executionEnvironments": [
+    {
+      "root": "vedaguard",
+      "pythonVersion": "3.12",
+      "extraPaths": ["vedaguard/.venv/lib/python3.12/site-packages"]
+    }
+  ]
+}

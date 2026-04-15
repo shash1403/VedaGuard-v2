@@ -1,0 +1,47 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
+!**/.env.example
+!.env.*.example
+!**/.env.*.example
+
+# Python (any depth)
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+**/dist/
+**/build/
+**/*.egg-info/
+
+# Node (any depth)
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.npm/
+
+# AlgoKit / local_debug
+**/debug_traces/
+
+# IDE
+.idea/
+*.code-workspace
+
+# Local installers / stray uploads (do not commit)
+*.dmg
+*.iso
+/[0-9]*.jpg
+
+# Logs
+*.log
+npm-debug.log*

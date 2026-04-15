@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "vedaguard"
+version = "0.1.0"
+description = "VedaGuard — DPDP-aligned parental consent on Algorand (AlgoKit / Puya)"
+authors = ["VedaGuard Contributors"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+algokit-utils = "^4.0.0"
+py-algorand-sdk = "^2.11.0"
+python-dotenv = "^1.0.0"
+algorand-python = "^3"
+algorand-python-testing = "^1"
+
+[tool.poetry.group.dev.dependencies]
+algokit-client-generator = "^2.1.0"
+puyapy = "*"
+pytest = "^9.0.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# Help Pylance/Pyright resolve algokit-utils and py-algorand-sdk (algosdk) in this folder.
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+markers = [
+    "e2e: TestNet integration (requires ALGOKIT_DISPENSER_ACCESS_TOKEN and optional VEDAGUARD_E2E_*; skipped if unset)",
+]
+
