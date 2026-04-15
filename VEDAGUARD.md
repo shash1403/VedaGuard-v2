@@ -3,7 +3,7 @@
 ## 1. Objective
 To build a functional "Parental Consent Loop" that satisfies Section 9 of the DPDP Act 2025 using the Algorand Blockchain.
 
-## 2. Key Features to Implement by April 15
+## 2. Key Features 
 ### Feature A: The Link (Onboarding)
 - **Action:** A parent connects their wallet and "registers" a child.
 - **Result:** The Smart Contract mints a non-transferable Soul-Bound Token (SBT) to the parent's wallet. The token metadata contains the hashed ID of the child.
@@ -57,48 +57,7 @@ This project is aligned with the official **AlgoBharat Developer Hub** guidance 
 
 ---
 
-## 5. April 15, 2026 submission — panel criteria vs implementation
-
-Use this table when preparing the hack submission and demo script.
-
-### One core feature, full-stack, non-prototype
-
-| Criterion | Status | Evidence in repo |
-|-----------|--------|------------------|
-| **One polished feature end-to-end** | **Met** | **Atomic parental consent:** UI “Grant Access” builds a real 3-tx group (`axfer` + 0 µALGO `pay` + `verify_consent` app call), Pera signs, algod confirms; `consent_count` updates on-chain. Code: `veda-ui/src/lib/algorand.ts`, `ConsentCard.tsx`, contract `verify_consent`. |
-| **UI → Algorand → confirmation** (not clickable fake) | **Met** | `AtomicTransactionComposer` + `waitForConfirmation`; UI shows round + `verify_consent` txid. |
-| **Tests / reproducibility** | **Met** | `vedaguard/tests/vedaguard_test.py` — 14 pytest tests including SBT mint/distribute, atomic consent, and age boundary. |
-| **CI** | **Met** | `.github/workflows/ci.yml` — pytest, PuyaPy compile, `veda-ui` production build. |
-
-### Panel MVP: SBT issuance + atomic consent
-
-| Ask | Status | Notes |
-|-----|--------|--------|
-| **Atomic transfer consent mechanism** | **Met** | Enforced in TEAL (`verify_consent`); judges can run tests + Lora + live UI. |
-| **SBT issuance (minimal working)** | **Met** | `onboard_minor` submits an inner **`AssetConfig`** (single unit, app-managed roles, **32-byte `metadata_hash` only** — no raw PII). `deploy_config` then **opts the parent in** and calls **`distribute_and_freeze_sbt`** so the SBT sits in the parent wallet **frozen** (non-transferable). Judges: run deploy + set `VITE_CONSENT_ASSET_ID` to that ASA index for the hospital `axfer` leg. |
-| **Clarify hospital + parental verification feasibility** | **Partial (document for judges)** | **Current demo:** one wallet signs all three txs (parent + “hospital” leg) so the flow works without a hospital backend. **Narrative for panel:** hospital publishes unsigned `axfer`; backend or dapp groups it with parent `pay` + app call; parent-only signing for payment + app call is the production split. Add 1 slide or README subsection *“Integration: hospital as co-signer on txn 0 only.”* |
-
-### RegTech / DPDP alignment
-
-| Topic | Status |
-|-------|--------|
-| **Section 9 style consent (atomic)** | Met — enforced by group + TEAL asserts. |
-| **Section 2(i) principal (parent / SBT metaphor)** | Met — minted ASA SBT + frozen holder; parent address still passed for off-chain / deploy pairing with `distribute_and_freeze_sbt`. |
-| **Section 2(f) age transition** | Met in logic — `check_age_transition` (+ tests). Name differs from spec’s `claim_adult_status`; handoff to child wallet not in MVP scope. |
-
-### Org guidance (Technical Resource Guide, VibeKit)
-
-| Item | Status |
-|------|--------|
-| **AlgoBharat / Algorand dev resources** | Linked in `README.md`, `VEDAGUARD.md` §4, `veda-ui` footer. |
-| **VibeKit** | Documented in `vedaguard/README.md`; optional dev install — not required at runtime. |
-
-### Remaining tasks (pick before demo if time allows)
-
-1. [x] **SBT:** Real **ASA** mint + **freeze** path implemented (`onboard_minor`, `distribute_and_freeze_sbt`, deploy wiring).
-2. [ ] **Integration story:** Short **“Hospital integration”** paragraph (API or manual grouping) + diagram in deck or `README`.
-3. [ ] **Demo recording:** Screen capture: connect wallet → Grant Access → Pera → confirmed tx + Lora `consent_count`.
-4. [ ] **GitHub:** Remote + CI badge + repo description/tags (`algorand`, `algokit`, `dpdp`, `algobharat`).
+ 
 
 ### Quick verification commands
 
