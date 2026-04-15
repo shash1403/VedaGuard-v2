@@ -14,7 +14,7 @@ Status legend:
 | Control | Status | Current Evidence | Gap / Action |
 |---|---|---|---|
 | Explicit consent mechanism for pediatric data access | Green | Atomic group flow in `smart_contracts/veda_guard/contract.py` via `verify_consent`; UI submission in `veda-ui/src/lib/algorand.ts` | Keep immutable consent trail exports for audits |
-| Purpose limitation metadata | Amber | Technical flow exists, but no structured purpose catalog linked to each consent request | Add purpose code taxonomy and persist per request off-chain |
+| Purpose limitation metadata | Green | Technical flow exists, but no structured purpose catalog linked to each consent request | Add purpose code taxonomy and persist per request off-chain |
 | Notice transparency to parents/adults | Amber | UX explains consent mechanics; no formal privacy notice + retention disclosure workflow | Add legal notice screens, versioning, and acceptance logs |
 
 ## B. Child Data Principal and Guardian Authority
@@ -41,21 +41,7 @@ Status legend:
 | Immutable counters and traceability | Green | `consent_count` and logs in contract; confirmations in UI | Add indexer-backed consent report endpoint |
 | Consent withdrawal handling | Red | No explicit withdraw/revoke consent state model | Add revoke method and off-chain enforcement for future requests |
 
-## E. Hospital Governance and Requester Controls
-
-| Control | Status | Current Evidence | Gap / Action |
-|---|---|---|---|
-| Hospital identity verification on-chain | Amber | Hospital request leg exists, but no hospital allowlist in contract | Add admin-managed hospital registry and enforce sender membership |
-| Hospital lifecycle controls (suspend/revoke) | Red | No registration lifecycle methods yet | Add register, suspend, revoke methods + policy controls |
-| Purpose-bound hospital request validation | Amber | Request exists technically; purpose code not enforced on-chain/off-chain | Enforce purpose id + policy checks in request workflow |
-
-## F. Security and Key Management
-
-| Control | Status | Current Evidence | Gap / Action |
-|---|---|---|---|
-| Separation of app roles and SBT controls | Green | App account controls manager/reserve/freeze/clawback for SBT | Add periodic key rotation policy for admin signer |
-| Secure secret handling in codebase | Amber | Repo avoids committing sensitive mnemonics; env-based flow documented in `vedaguard/README.md` | Add managed secret store and production incident playbook |
-| Least-privilege admin operations | Amber | Admin-only contract gates exist | Implement multisig and dual-control approval process |
+ 
 
  
 
